@@ -12,7 +12,7 @@ https://darienmt.com/autonomous-flight/2018/10/20/flying-ros-and-hector.html
 
 #sciaganie mojej paczki
 cd ~/hector_quadrotor/src
-git clone https://github.com/xivien/drones_gazebo.git
+git clone 
 
 #uruchom bashrc
 nano ~/.bashrc
