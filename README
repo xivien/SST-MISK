@@ -34,4 +34,6 @@ roscd multiple_drones_gazebo
 cd ./launch
 ./setup.bash 5
 
+Kod odpowiedzialny za algorytm sterowania znajduje się w:
 
+roscd multiple_drones_gazebo/src
