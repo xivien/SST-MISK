@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="drone_cnt" default="8"/>
+  <node name="main_control_node" pkg="multiple_drones_gazebo" type="main_control_node.py" args="$(arg drone_cnt)" output="screen"/>
+  
+</launch>

@@ -1,0 +1,16 @@
+<launch>
+    
+    <arg name="drone_name" default="drone" />
+    <arg name="y_pos" default="0" />
+    <group ns="$(arg drone_name)">
+        <include file="$(find hector_quadrotor_gazebo)/launch/spawn_quadrotor_with_kinect.launch">
+            <arg name="name" value="$(arg drone_name)" />
+            <arg name="tf_prefix" value="$(arg drone_name)" />
+            <arg name="y" value="$(eval arg('y_pos')*2)" />
+        </include>
+    </group>
+    <!-- <node pkg="rviz" type="rviz" name="rviz" args="-d $(find multiple_drones_gazebo)/rviz_cfg/drone.rviz"/>  -->
+    
+  
+</launch>
+

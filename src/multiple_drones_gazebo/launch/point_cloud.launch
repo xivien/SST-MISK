@@ -1,0 +1,9 @@
+<launch>
+    
+    <arg name="drone_name" default="drone" />
+    <!-- <node pkg="multiple_drones_gazebo" type="point_cloud_edit.py" name="1_1_edit" output="screen" args="name"/> -->
+
+	<node pkg="multiple_drones_gazebo" type="point_cloud_edit.py" name="$(arg drone_name)_edit" output="screen" args="$(arg drone_name)"/>
+
+</launch>
+
