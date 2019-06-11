@@ -7,19 +7,21 @@ https://www.tecmint.com/install-ubuntu-16-04-alongside-with-windows-10-or-8-in-d
 https://github.com/wsnewman/learning_ros_setup_scripts
 # tutorial
 http://wiki.ros.org/kinetic/Installation/Ubuntu
+
+### PACZKA DODANA DO REPORYZTORIUM NIE INSTALOWAC ###
 # instalacja paczki hector_quadrotor (zmienilem nazwe workspace na hector_quadrotor)
 https://darienmt.com/autonomous-flight/2018/10/20/flying-ros-and-hector.html
 
 #sciaganie mojej paczki
-cd ~/hector_quadrotor/src
-git clone 
+cd ~/hector_quadrotor
+git clone https://github.com/xivien/SST-MISK.git
 
 #uruchom bashrc
 nano ~/.bashrc
 #dodac do bashrc
 source ~/hector_quadrotor/devel/setup.bash
 #dodaj sciezke na modele
-export GAZEBO_MODEL_PATH=/home/xivien/hector_quadrotor/src/drones_gazebo/models:$GAZEBO_MODEL_PATH
+export GAZEBO_MODEL_PATH=/home/USER/hector_quadrotor/src/multiple_drones_gazebo/models:$GAZEBO_MODEL_PATH
 # zapisac ctrl+o zamknac ctrl+x
 # kompiluj repo
 cd ~/hector_quadrotor
@@ -28,15 +30,11 @@ catkin_make
 #odpal swiat symulacji
 roslaunch multiple_drones_gazebo city.launch
 
-# odpal drony domyslne parametry 3 3
+# odpalenie rviz
+oslaunch multiple_drones_gazebo rviz.launch
+# odpal drony domyslne parametry 8
 roscd multiple_drones_gazebo
 cd ./launch
-./setup.bash 5 5
+./setup.bash 5
 
-## jeden dron z lokalizacja i mapowaniem
-# uruchomienie srodowiska i drona
-sudo apt-get install ros-kinetic-gmapping
-sudo apt-get install ros-kinetic-teleop-twist-keyboard
-roslaunch multiple_drones_gazebo city.launch
-roslaunch multiple_drones_gazebo drone.launch
 
