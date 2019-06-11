@@ -39,28 +39,4 @@ sudo apt-get install ros-kinetic-gmapping
 sudo apt-get install ros-kinetic-teleop-twist-keyboard
 roslaunch multiple_drones_gazebo city.launch
 roslaunch multiple_drones_gazebo drone.launch
-# mapowanie jesli chcecie zrobic nowa mape
-roslaunch quadrotor_navigation quadrotor_mapping.launch
-# zapisanie mapy
-rosrun map_server map_saver -f city_part_map
-# lokalizacja
-roslaunch quadrotor_navigation quadrotor_localization.launch 
-# autonomiczna nawigacja
-roslaunch quadrotor_navigation quadrotor_move_base.launch 
 
-
-## latanie na manualu
-# wlaczenie silnikow 
-rosservice call drone/enable_motors true
-#odpalenie pliku startowego ktory unosi drona ( mozna robic recznym sterowaniem ale slabe do lokalizacji)
-rostopic pub /takeoff std_msgs/Empty "{}"
-# sterowanie manual
-rosrun teleop_twist_keyboard teleop_twist_keyboard.py cmd_vel:=drone/cmd_vel
-
-# zeby uzyc czegos na dronie najpierw trzeba odpalic silniki i uzyc take off zeby sie uniosl a potem szybko zadawac 2D Nav Goal
-
-# tutorial z yt
-https://www.youtube.com/watch?v=dND4oCMqmRs&list=PLK0b4e05LnzbrLrLhOhSvLdaQZOsJl59N&index=4
-
-
-#u mnie dziala
