@@ -1,11 +1,8 @@
-# zainstaluj ros kinetic na ubuntu 16.04 lub maszynie wirtualnej
-# tutorial do maszyny wirtualnej
-https://github.com/wsnewman/learning_ros/tree/master/additional%20documents
+# zainstaluj ros kinetic na ubuntu 16.04
 # instalacja ubuntu na dual boot
 https://www.tecmint.com/install-ubuntu-16-04-alongside-with-windows-10-or-8-in-dual-boot/
-# tutaj sa gotowe skrypty do instalowania rosa z jakiegos podrecznika ale polecam zrobic to z tutoriala
-https://github.com/wsnewman/learning_ros_setup_scripts
-# tutorial
+
+# tutorial ROS
 http://wiki.ros.org/kinetic/Installation/Ubuntu
 
 ### PACZKA DODANA DO REPORYZTORIUM NIE INSTALOWAC ###
