@@ -13,7 +13,7 @@ catkin_make
 roslaunch multiple_drones_gazebo city.launch
 
 # odpalenie rviz
-oslaunch multiple_drones_gazebo rviz.launch
+roslaunch multiple_drones_gazebo rviz.launch
 
 # odpal drony domyslne parametry 8 dronów
 roscd multiple_drones_gazebo
