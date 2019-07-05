@@ -1,0 +1,8 @@
+prefix=/home/xivien/hector_quadrotor/install
+
+Name: multiple_drones_gazebo
+Description: Description of multiple_drones_gazebo
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/xivien/hector_quadrotor/install/lib 
+Requires: 

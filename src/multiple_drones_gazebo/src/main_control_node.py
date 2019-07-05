@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+
+from pos_ori_fun import *
+
+
 import rospy
 import time
 import sys
@@ -10,48 +14,12 @@ from sklearn.preprocessing import normalize
 import numpy as np
 from tf.transformations import *
 
-
-# difference between poses in common frame of structure {'X': np.array([x, y, z]), 'O': np.array(quaternion)}
-def pose_diff(p1, p2, k = 1.):
-    q1 = p1['O'] 
-    q2 = p2['O']
-    diff = {'X': k * (p1['X'] - p2['X']), 'O': qq_div(quaternion_slerp(q1, q2, k), q1) }
-    return diff
-
-# quaternion rotation
-def qv_rot(q, v):
-    v = np.append(v, 1)
-    return np.matmul(quaternion_matrix(q), v)[0:3]
-
-# quaternion relative rotation
-def qq_div(q1, q2):
-    return quaternion_multiply(q2, quaternion_inverse(q1))
-
-# flat, radial formation with center point in [0 0 0], aligned along x, facing outside
-def make_formation(r_form, n):
-    r = np.array([r_form, 0., 0.], dtype = np.float64)
-    pos = {}
-    for i in range(n):
-        q_rot = quaternion_from_euler(0, 0,  - 2. * i * np.pi / n)
-        pos[i] = {'X': qv_rot(q_rot, r), 'O':q_rot}
-    return pos
-
-def angle(v1, v2, acute):
-    angle = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
-    if (acute == True):
-        return angle
-    else:
-        return 2 * np.pi - angle
-
-
-
 class Control: 
 
     # callback function for pose reading
     def call_pose(self, data, arg):
         #PoseStamped
         drone_id = arg
-        #p = [Point2list(data.pose.position), Quaternion2list(data.pose.orientation)]
         if not self.recv_pose[drone_id]:
             pos = data.pose.position
             ori = data.pose.orientation
@@ -75,7 +43,6 @@ class Control:
 
     # obstacles pushes evaluation, settable params: linear gain (gain) and inverted vector norm power (pow_dist)
     def col_avoid(self, gain = 1.0, pow_dist = 1.):
-        # print(gain)
         margin = 0.35
         obstacle_push = {}
         obst_cnt = 10
@@ -85,13 +52,6 @@ class Control:
                 lens = np.linalg.norm(obst_temp, axis = 1)
                 dirs = normalize(obst_temp, norm='l2')
 
-
-                # idxs = np.argsort(lens)[::-1][0:obst_cnt]
-                # lensi = lens[idxs]
-                # dirsi = dirs[idxs,:]
-
-                # gaini /= obst_cnt
-                # pushes = gaini * dirsi * np.power(lensi, 1 - pow_dist)[:, None]
                 pushes = gaini * dirs * np.power(lens - margin, 1 - pow_dist)[:, None]
                 push_loc = np.sum(pushes, axis = 0)
                 push_glob = qv_rot(self.Pose_list[i]['O'], push_loc)
@@ -157,11 +117,9 @@ class Control:
             # virtualX, virtualV - LIDER pose, velocity global
             # formation - shape
             # vi = vil + k(x_zad - x_own)
-            k = 0.3    #do some PID
+            k = 0.3    #PID gain
             qL = self.virtualX[q_id]['O']
             x_zad = self.virtualX[q_id]['X'] + qv_rot(qL, self.formation[q_id]['X'])
-            # x_zad = self.virtualX[q_id]['X'] + self.formation[q_id]['X']
-            # x_zad = (q_id + 1) * np.array([0, 0, 2])
             wL = euler_from_quaternion(self.virtualV[q_id]['O'])
             Vadd = np.cross(self.formation[q_id]['X'], wL)
             V = (self.virtualV[q_id]['X'] + Vadd) + k * (x_zad - self.Pose_list[q_id]['X'])
@@ -169,10 +127,10 @@ class Control:
             msg.linear.x = V[0]
             msg.linear.y = V[1]
             msg.linear.z = V[2]
+            
             # wi = wil + k(fi_zad - fi_own)
             wil = self.virtualV[q_id]['O']
             fi_zad = quaternion_multiply(self.virtualX[q_id]['O'], self.formation[q_id]['O'])
-            # fi_zad = np.array([0,0,0,1])
             fi_own = self.Pose_list[q_id]['O']
             wi = quaternion_multiply(wil, qq_div(fi_own, fi_zad))
             rwi = euler_from_quaternion(wi)
@@ -180,8 +138,6 @@ class Control:
             msg.angular.y = rwi[1]
             msg.angular.z = rwi[2]
             pub.publish(msg)
-
-
 
 
     # class initialization
@@ -208,14 +164,15 @@ class Control:
         # Kinect data holder
         self.Obst_list = {}
         # consensus gains
-        k_mine = 3. #3 
-        k_yours = 1. # 1
+        k_mine = 3.
+        k_yours = 1.
         W = k_yours * np.ones([self.drone_count, self.drone_count], dtype = np.float64) + k_mine*np.eye(self.drone_count, dtype = np.float64)
         self.W_true = np.divide(W, np.sum(W, axis = 1))
         self.W = self.W_true
         
         # Radial, flat formation
         self.formation = make_formation(r_form = 2.5, n = self.drone_count)
+
         # lower bound for obstacles push
         self.min_push = 0.63
         # virtual leader initialization flag
@@ -224,7 +181,6 @@ class Control:
         self.virtualX = {}
         # virtual leader velocities  virtualV[#] = {'X':, 'O':}
         self.virtualV = {}
-        ################################ should target be oriented?
         # pseudo target velocity, initial forward flight
         self.targetV = {'X': np.array([0, 0, 0], dtype = np.float64), 'O': np.array([0., 0., 0., 1.], dtype = np.float64)}
         # pseudo target position
@@ -268,16 +224,13 @@ class Control:
         start_delay = 40
         n_pol =3 
         while not rospy.is_shutdown():
-            
-            
-            
+               
             self.msg_tarX.pose.position.x = self.targetX['X'][0]
             self.msg_tarX.pose.position.y = self.targetX['X'][1]
             self.msg_tarX.pose.position.z = self.targetX['X'][2]
 
             self.tar_pub.publish(self.msg_tarX)
 
-            # self.targetV = np.random.random([])
             # virtual leader initialization
             while not self.init_virtual_flag:
                 if self.recv_pose.count(False) == 0:
@@ -293,12 +246,9 @@ class Control:
 
             
             if self.recv_pose.count(False) == 0 and self.recv_obst.count(False) == 0:
-                # elapsed = time.time() - t
-                # t = time.time()
-                # print(1/elapsed)
-                ## Update virtual
+                # Update virtual
                 if dir_cnt > 100:
-                    # destroy random connection
+                    ## destroy random connection
                     # self.W = self.W_true
                     # print('Usuniete polaczenia')
                     # index_throw = np.random.randint(0,self.drone_count, size=(n_pol,2))
@@ -308,20 +258,22 @@ class Control:
                     #         print(index_throw[i])
                     #  
                     # print('------------')
-                    self.targetV['X'][0] = np.random.rand()-0.5
-                    self.targetV['X'][1] = np.random.rand()-0.5
+
+                    ## chagne target direction
+                    # self.targetV['X'][0] = np.random.rand()-0.5
+                    # self.targetV['X'][1] = np.random.rand()-0.5
                     dir_cnt = 0
+                # udpate target
                 self.tar_update()
-                push_gain = 0. if start < start_delay else 0.0 #2.1
+
+                # delays to make formation without target
+                push_gain = 0. if start < start_delay else 0.0 
                 follow_gain = 0. if start < start_delay else 1.0
+
                 push = self.col_avoid(gain = -push_gain, pow_dist = 1.5)
-                # print('--------push:')
-                # print(push[0])
-                # print(push[1])
+
                 pull = self.tar_follow(gain = follow_gain, pow_tar = 0.5)
-                # print('--------pull:')
-                # print(pull[0])
-                # print(pull[1])
+
                 self.update_virtual(push, pull)
                 
                 self.send_msgs()
