@@ -23,3 +23,6 @@ cd ./launch
 Kod odpowiedzialny za algorytm sterowania znajduje się w:
 
 roscd multiple_drones_gazebo/src
+
+filmy z działania:
+https://www.youtube.com/playlist?list=PL4eGLUZBgGBteOfGWnKMimkxXfDlFWvwK
